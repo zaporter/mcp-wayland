@@ -1,0 +1,255 @@
+[
+  {
+    "name": "zwlr_foreign_toplevel_manager_v1",
+    "version": 3,
+    "description": "\n      The purpose of this protocol is to enable the creation of taskbars\n      and docks by providing them with a list of opened applications and\n      letting them request certain actions on them, like maximizing, etc.\n\n      After a client binds the zwlr_foreign_toplevel_manager_v1, each opened\n      toplevel window will be sent via the toplevel event\n    ",
+    "summary": "list and control opened apps",
+    "requests": [
+      {
+        "name": "stop",
+        "description": "\n        Indicates the client no longer wishes to receive events for new toplevels.\n        However the compositor may emit further toplevel_created events, until\n        the finished event is emitted.\n\n        The client must not send any more requests after this one.\n      ",
+        "summary": "stop sending events",
+        "args": []
+      }
+    ],
+    "events": [
+      {
+        "name": "toplevel",
+        "description": "\n        This event is emitted whenever a new toplevel window is created. It\n        is emitted for all toplevels, regardless of the app that has created\n        them.\n\n        All initial details of the toplevel(title, app_id, states, etc.) will\n        be sent immediately after this event via the corresponding events in\n        zwlr_foreign_toplevel_handle_v1.\n      ",
+        "summary": "a toplevel has been created",
+        "args": [
+          {
+            "name": "toplevel",
+            "type": "new_id",
+            "interface": "zwlr_foreign_toplevel_handle_v1"
+          }
+        ]
+      },
+      {
+        "name": "finished",
+        "description": "\n        This event indicates that the compositor is done sending events to the\n        zwlr_foreign_toplevel_manager_v1. The server will destroy the object\n        immediately after sending this request, so it will become invalid and\n        the client should free any resources associated with it.\n      ",
+        "summary": "the compositor has finished with the toplevel manager",
+        "args": []
+      }
+    ],
+    "enums": {}
+  },
+  {
+    "name": "zwlr_foreign_toplevel_handle_v1",
+    "version": 3,
+    "description": "\n      A zwlr_foreign_toplevel_handle_v1 object represents an opened toplevel\n      window. Each app may have multiple opened toplevels.\n\n      Each toplevel has a list of outputs it is visible on, conveyed to the\n      client with the output_enter and output_leave events.\n    ",
+    "summary": "an opened toplevel",
+    "requests": [
+      {
+        "name": "set_maximized",
+        "description": "\n        Requests that the toplevel be maximized. If the maximized state actually\n        changes, this will be indicated by the state event.\n      ",
+        "summary": "requests that the toplevel be maximized",
+        "args": []
+      },
+      {
+        "name": "unset_maximized",
+        "description": "\n        Requests that the toplevel be unmaximized. If the maximized state actually\n        changes, this will be indicated by the state event.\n      ",
+        "summary": "requests that the toplevel be unmaximized",
+        "args": []
+      },
+      {
+        "name": "set_minimized",
+        "description": "\n        Requests that the toplevel be minimized. If the minimized state actually\n        changes, this will be indicated by the state event.\n      ",
+        "summary": "requests that the toplevel be minimized",
+        "args": []
+      },
+      {
+        "name": "unset_minimized",
+        "description": "\n        Requests that the toplevel be unminimized. If the minimized state actually\n        changes, this will be indicated by the state event.\n      ",
+        "summary": "requests that the toplevel be unminimized",
+        "args": []
+      },
+      {
+        "name": "activate",
+        "description": "\n        Request that this toplevel be activated on the given seat.\n        There is no guarantee the toplevel will be actually activated.\n      ",
+        "summary": "activate the toplevel",
+        "args": [
+          {
+            "name": "seat",
+            "type": "object",
+            "interface": "wl_seat"
+          }
+        ]
+      },
+      {
+        "name": "close",
+        "description": "\n        Send a request to the toplevel to close itself. The compositor would\n        typically use a shell-specific method to carry out this request, for\n        example by sending the xdg_toplevel.close event. However, this gives\n        no guarantees the toplevel will actually be destroyed. If and when\n        this happens, the zwlr_foreign_toplevel_handle_v1.closed event will\n        be emitted.\n      ",
+        "summary": "request that the toplevel be closed",
+        "args": []
+      },
+      {
+        "name": "set_rectangle",
+        "description": "\n        The rectangle of the surface specified in this request corresponds to\n        the place where the app using this protocol represents the given toplevel.\n        It can be used by the compositor as a hint for some operations, e.g\n        minimizing. The client is however not required to set this, in which\n        case the compositor is free to decide some default value.\n\n        If the client specifies more than one rectangle, only the last one is\n        considered.\n\n        The dimensions are given in surface-local coordinates.\n        Setting width=height=0 removes the already-set rectangle.\n      ",
+        "summary": "the rectangle which represents the toplevel",
+        "args": [
+          {
+            "name": "surface",
+            "type": "object",
+            "interface": "wl_surface"
+          },
+          {
+            "name": "x",
+            "type": "int"
+          },
+          {
+            "name": "y",
+            "type": "int"
+          },
+          {
+            "name": "width",
+            "type": "int"
+          },
+          {
+            "name": "height",
+            "type": "int"
+          }
+        ]
+      },
+      {
+        "name": "destroy",
+        "description": "\n        Destroys the zwlr_foreign_toplevel_handle_v1 object.\n\n        This request should be called either when the client does not want to\n        use the toplevel anymore or after the closed event to finalize the\n        destruction of the object.\n      ",
+        "summary": "destroy the zwlr_foreign_toplevel_handle_v1 object",
+        "args": []
+      },
+      {
+        "name": "set_fullscreen",
+        "description": "\n        Requests that the toplevel be fullscreened on the given output. If the\n        fullscreen state and/or the outputs the toplevel is visible on actually\n        change, this will be indicated by the state and output_enter/leave\n        events.\n\n        The output parameter is only a hint to the compositor. Also, if output\n        is NULL, the compositor should decide which output the toplevel will be\n        fullscreened on, if at all.\n      ",
+        "summary": "request that the toplevel be fullscreened",
+        "args": [
+          {
+            "name": "output",
+            "type": "object",
+            "interface": "wl_output",
+            "allow-null": "true"
+          }
+        ]
+      },
+      {
+        "name": "unset_fullscreen",
+        "description": "\n        Requests that the toplevel be unfullscreened. If the fullscreen state\n        actually changes, this will be indicated by the state event.\n      ",
+        "summary": "request that the toplevel be unfullscreened",
+        "args": []
+      }
+    ],
+    "events": [
+      {
+        "name": "title",
+        "description": "\n        This event is emitted whenever the title of the toplevel changes.\n      ",
+        "summary": "title change",
+        "args": [
+          {
+            "name": "title",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "name": "app_id",
+        "description": "\n        This event is emitted whenever the app-id of the toplevel changes.\n      ",
+        "summary": "app-id change",
+        "args": [
+          {
+            "name": "app_id",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "name": "output_enter",
+        "description": "\n        This event is emitted whenever the toplevel becomes visible on\n        the given output. A toplevel may be visible on multiple outputs.\n      ",
+        "summary": "toplevel entered an output",
+        "args": [
+          {
+            "name": "output",
+            "type": "object",
+            "interface": "wl_output"
+          }
+        ]
+      },
+      {
+        "name": "output_leave",
+        "description": "\n        This event is emitted whenever the toplevel stops being visible on\n        the given output. It is guaranteed that an entered-output event\n        with the same output has been emitted before this event.\n      ",
+        "summary": "toplevel left an output",
+        "args": [
+          {
+            "name": "output",
+            "type": "object",
+            "interface": "wl_output"
+          }
+        ]
+      },
+      {
+        "name": "state",
+        "description": "\n        This event is emitted immediately after the zlw_foreign_toplevel_handle_v1\n        is created and each time the toplevel state changes, either because of a\n        compositor action or because of a request in this protocol.\n      ",
+        "summary": "the toplevel state changed",
+        "args": [
+          {
+            "name": "state",
+            "type": "array"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "description": "\n        This event is sent after all changes in the toplevel state have been\n        sent.\n\n        This allows changes to the zwlr_foreign_toplevel_handle_v1 properties\n        to be seen as atomic, even if they happen via multiple events.\n      ",
+        "summary": "all information about the toplevel has been sent",
+        "args": []
+      },
+      {
+        "name": "closed",
+        "description": "\n        This event means the toplevel has been destroyed. It is guaranteed there\n        won't be any more events for this zwlr_foreign_toplevel_handle_v1. The\n        toplevel itself becomes inert so any requests will be ignored except the\n        destroy request.\n      ",
+        "summary": "this toplevel has been destroyed",
+        "args": []
+      },
+      {
+        "name": "parent",
+        "description": "\n        This event is emitted whenever the parent of the toplevel changes.\n\n        No event is emitted when the parent handle is destroyed by the client.\n      ",
+        "summary": "parent change",
+        "args": [
+          {
+            "name": "parent",
+            "type": "object",
+            "interface": "zwlr_foreign_toplevel_handle_v1",
+            "allow-null": "true"
+          }
+        ]
+      }
+    ],
+    "enums": {
+      "state": [
+        {
+          "name": "maximized",
+          "value": 0,
+          "summary": "the toplevel is maximized"
+        },
+        {
+          "name": "minimized",
+          "value": 1,
+          "summary": "the toplevel is minimized"
+        },
+        {
+          "name": "activated",
+          "value": 2,
+          "summary": "the toplevel is active"
+        },
+        {
+          "name": "fullscreen",
+          "value": 3,
+          "summary": "the toplevel is fullscreen"
+        }
+      ],
+      "error": [
+        {
+          "name": "invalid_rectangle",
+          "value": 0,
+          "summary": "the provided rectangle is invalid"
+        }
+      ]
+    }
+  }
+]
